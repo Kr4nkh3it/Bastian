@@ -49,7 +49,7 @@ def Send_Req(addr,file):
                     print(f"trying {line} as directory")
                 data = addr.recv(1000)
                 data = data.decode("utf-8")
-                if "404" in data:
+                if "404" in data or "400" in data:
                     errors+=1
                 else:
                     good_dirs.append(line)
