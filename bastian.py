@@ -1,4 +1,4 @@
-import socket,threading
+import socket,threading,time
 from queue import Queue
 
 web_loc = input("Enter url and port\nex: https://url:port[")
@@ -28,6 +28,9 @@ except:
     sock.connect((url,port))
     
 wordlist = input("Enter wordlist ex: wordlist.txt[")
+ext = input("Choose file extension\nex: .php[")
+if ext == " " or ext == "":
+    ext = ".php"
 
 def Remove(text):
     text_list = list(text.split("GET"))
@@ -37,40 +40,86 @@ def Remove(text):
         txt = text_list[0]
     txt = txt.replace("\n" and "\r","")
 
-def Send_Req(addr,file):
-    errors = 0
-    good_dirs = []
-    info = []
-    with open(file,'r') as f:
-        for line in f:
-            try:
-                addr.send(f"GET /{line} HTTP/1.0\r\nHost: {url}\r\n\r\n".encode("utf-8"))
+def Find_Dirs(addr,wordlist,db,db2,db3):
+    with open(wordlist,'r') as f:
+        for directory in f:
+            addr.send(f"GET /{directory} HTTP/1.0\r\nHost: {url}\r\n\r\n".encode("utf-8"))
+            if out == "1":
+                print(f"checking {url}/{directory}")
+            data = addr.recv(1000)
+            data = data.decode("utf-8")
+            if "404" and "Error" in data or "400" and "Error" in data:
+                db3.append(directory)
+            elif Remove(data) == None:
+                pass
+            else:
+                db.append(directory)
+                db2.append(Remove(data))
+
+def Find_Files(addr,wordlist,db,db2,db3):
+    with open(wordlist,'r') as f:
+        for directory in db:
+            for file in f:
+                addr.send(f"GET /{directory}/{file}.{ext} HTTP/1.0\r\nHost: {url}\r\n\r\n".encode("utf-8"))
                 if out == "1":
-                    print(f"checking {url}/{line})
+                    print(f"checking {url}/{directory}/{file}.{ext}")
                 data = addr.recv(1000)
                 data = data.decode("utf-8")
-                if "404" in data or "400" in data:
-                    errors+=1
+                if "404" and "Error" in data or "400" and "Error" in data:
+                    db3.append(file)
                 elif Remove(data) == None:
                     pass
                 else:
-                    good_dirs.append(line)
-                    info.append(Remove(data))
-            except:
-                print("There must of been a connection error")
-                addr.close()
-                addr = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
-                addr.connect((url.replace("https://" or "http://",""),port))
+                    db2.append(Remove(data))
+
+def Send_Req(addr,file):
+    counter = 0
+    bad_files = []
+    bad_dirs = []
+    good_dirs = []
+    info = []
+
+    while counter <= 20:
+        try:
+            Find_Dirs(addr,file,good_dirs,info,bad_dirs)
+        except socket.error:
+            print("There must of been a connection error")
+            time.sleep(5)
+            addr.close()
+            print("Trying reconnection...")
+            addr = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
+            addr.connect((url.replace("https://" or "http://",""),port))
+            counter +=1
+        try:
+            Find_Files(addr,file,good_dirs,info,bad_files)
+        except socket.error:
+            print("There must of been a connection error")
+            time.sleep(5)
+            addr.close()
+            print("Trying reconnection...")
+            addr = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
+            addr.connect((url.replace("https://" or "http://",""),port))
+            counter+=1
+    if counter >= 20:
+        print("There were too many connection errors")
+    
     addr.close()
     return good_dirs, info
 
 
 dirs_used,data = Send_Req(sock,wordlist)
 
+for dr in dirs_used:
+    if dr.count() >= 2:
+        dirs_used.remove(dr)
+
 for num in range(10):
     print(" 1 == yes, 2 == no")
     Choice = input("Would you like to see dirs used[")
     Choice2 = input("Would you like to see info gathered[")
+
+    if data == None:
+        data = "No info was gathered"
 
     if Choice == "1" and Choice2 == "1":
         for i in dirs_used:
@@ -92,3 +141,5 @@ for num in range(10):
         break
     else:
         print("Invalid Choices")
+
+
