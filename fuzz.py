@@ -15,7 +15,7 @@ def Web_Addr(location):
     print(url,port)
     s =  socket.socket(socket.AF_INET,socket.SOCK_STREAM)
     s.connect((addr,port))
-    return url,s
+    return url,s,port
 
 
 def Remove(text):
@@ -62,7 +62,7 @@ def Find_Files(url,addr,wordlist,db,db2,db3,out):
 
 
 
-def Send_Req(url,addr,file,choice):
+def Send_Req(url,addr,port,file,choice):
     counter = 0
     bad_files = []
     bad_dirs = []
@@ -78,7 +78,7 @@ def Send_Req(url,addr,file,choice):
             addr.close()
             print("Trying reconnection...")
             addr = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
-            addr.connect((url.replace("https://" or "http://",""),port))
+            addr.connect((url,port))
             counter +=1
         try:
             Find_Files(url,addr,file,good_dirs,info,bad_files,choice)
@@ -88,10 +88,11 @@ def Send_Req(url,addr,file,choice):
             addr.close()
             print("Trying reconnection...")
             addr = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
-            addr.connect((url.replace("https://" or "http://",""),port))
+            addr.connect((url,port))
             counter+=1
         if counter >= 20:
             print("There were too many connection errors")
     
     addr.close()
     return info
+
