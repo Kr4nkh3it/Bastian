@@ -6,14 +6,14 @@ web_loc = input("Enter url and port\nex: https://url,port[")
 print("1 == yes and 2 == no")
 out = input("output or no output when bruteforcing[")
 
-url,sock= Web_Addr(web_loc)
+url,sock,port= Web_Addr(web_loc)
 
 wordlist = input("Enter wordlist ex: wordlist.txt[")
 ext = input("Choose file extension\nex: .php[")
 if ext == " " or ext == "":
     ext = ".php"
 
-data = Send_Req(url,sock,wordlist,out)
+data = Send_Req(url,sock,port,wordlist,out)
 
 for num in range(10):
     print(" 1 == yes, 2 == no")
