@@ -1,15 +1,25 @@
 # Bastian
 basic url fuzzer using python 3
 
-Still working on it as there is a lot to add and work on
+W.I.P
 
-quick and easy tool for getting files and ddirectories from a website
+basic url fuzzer with threading and ease of use
+easy controls and default variables if you dont feel like entering anything
+information control and extreme speeds
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 Working on:
-Threading
-making the code beautiful
-possible arg parse or UI
-error handling 
-information handling
-output
+UI
