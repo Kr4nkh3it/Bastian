@@ -23,4 +23,3 @@ information control and extreme speeds
 
 Working on:
 UI
-simultaneously look for files in a good directory ater finding one and continue looking for new directories
